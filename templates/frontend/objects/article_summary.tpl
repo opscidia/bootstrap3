@@ -37,6 +37,13 @@
 						<small>{$article->getLocalizedSubtitle()|escape}</small>
 					</p>
 				{/if}
+				{* Article abstract *}
+				{if $publication->getLocalizedData('abstract')}
+					<h4>{translate key="article.abstract"}</h2>
+					<p>
+						<small>{$publication->getLocalizedData('abstract')|strip_unsafe_html|nl2br}</small>
+					</p>
+				{/if}
 			</a>
 		</h3>
 
