@@ -178,6 +178,7 @@
 								{if $author->getLocalizedAffiliation()}
 									<div class="article-author-affilitation">
 										{$author->getLocalizedAffiliation()|escape}
+										{$author->getLocalizedBiography()|strip_unsafe_html}
 									</div>
 								{/if}
 								{if $author->getOrcid()}
