@@ -164,7 +164,7 @@
 
 		</section><!-- .article-sidebar -->
 
-		<div class="col-md-8">
+		<div class="col-md-12">
 			<section class="article-main">
 
 				{* Screen-reader heading for easier navigation jumps *}
