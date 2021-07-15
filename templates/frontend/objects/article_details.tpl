@@ -56,9 +56,6 @@
 									<div class="article-author-affilitation">
 										{$author->getLocalizedAffiliation()|escape}
 									</div>
-									<div class="article-author-biography">
-										{$author->getLocalizedBiography()|strip_unsafe_html}
-									</div>
 								{/if}
 								{if $author->getOrcid()}
 									<div class="orcid">
@@ -82,10 +79,6 @@
 						</div>
 					</div>
 				{/if}
-
-				{call_hook name="Templates::Article::Main"}
-
-			</section><!-- .article-main -->
 
 			<section class="article-sidebar col-md-12">
 	
@@ -210,6 +203,12 @@
 	
 			</section><!-- .article-sidebar -->
 
+			<section class="article-main">
+
+				{call_hook name="Templates::Article::Main"}
+
+			</section><!-- .article-main -->
+
 			<section class="article-more-details">
 
 				{* Screen-reader heading for easier navigation jumps *}
@@ -323,6 +322,24 @@
 					</div>
 				{/if}
 
+				{call_hook name="Templates::Article::Details"}
+
+				{* References *}
+				{if $parsedCitations || $publication->getData('citationsRaw')}
+					<div class="article-references">
+						<h2>{translate key="submission.citations"}</h2>
+						<div class="article-references-content">
+							{if $parsedCitations}
+								{foreach from=$parsedCitations item="parsedCitation"}
+									<p>{$parsedCitation->getCitationWithLinks()|strip_unsafe_html} {call_hook name="Templates::Article::Details::Reference" citation=$parsedCitation}</p>
+								{/foreach}
+							{else}
+								{$publication->getData('citationsRaw')|nl2br}
+							{/if}
+						</div>
+					</div>
+				{/if}
+
 				{* Author biographies *}
 				{assign var="hasBiographies" value=0}
 				{foreach from=$publication->getData('authors') item=author}
@@ -345,37 +362,13 @@
 									<div class="media biography">
 										<div class="media-body">
 											<h3 class="media-heading biography-author">
-												{if $author->getLocalizedAffiliation()}
-													{capture assign="authorName"}{$author->getFullName()|escape}{/capture}
-													{capture assign="authorAffiliation"}<span class="affiliation">{$author->getLocalizedAffiliation()|escape}</span>{/capture}
-													{translate key="submission.authorWithAffiliation" name=$authorName affiliation=$authorAffiliation}
-												{else}
-													{$author->getFullName()|escape}
-												{/if}
+												{$author->getFullName()|escape}
 											</h3>
 											{$author->getLocalizedBiography()|strip_unsafe_html}
 										</div>
 									</div>
 								{/if}
 							{/foreach}
-						</div>
-					</div>
-				{/if}
-
-				{call_hook name="Templates::Article::Details"}
-
-				{* References *}
-				{if $parsedCitations || $publication->getData('citationsRaw')}
-					<div class="article-references">
-						<h2>{translate key="submission.citations"}</h2>
-						<div class="article-references-content">
-							{if $parsedCitations}
-								{foreach from=$parsedCitations item="parsedCitation"}
-									<p>{$parsedCitation->getCitationWithLinks()|strip_unsafe_html} {call_hook name="Templates::Article::Details::Reference" citation=$parsedCitation}</p>
-								{/foreach}
-							{else}
-								{$publication->getData('citationsRaw')|nl2br}
-							{/if}
 						</div>
 					</div>
 				{/if}
