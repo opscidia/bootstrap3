@@ -41,129 +41,6 @@
 
 	<div class="row">
 
-		<section class="article-sidebar col-md-4">
-
-			{* Screen-reader heading for easier navigation jumps *}
-			<h2 class="sr-only">{translate key="plugins.themes.bootstrap3.article.sidebar"}</h2>
-
-			{* Article/Issue cover image *}
-			{if $publication->getLocalizedData('coverImage') || ($issue && $issue->getLocalizedCoverImage())}
-				<div class="cover-image">
-					{if $publication->getLocalizedData('coverImage')}
-						{assign var="coverImage" value=$publication->getLocalizedData('coverImage')}
-						<img
-							class="img-responsive"
-							src="{$publication->getLocalizedCoverImageUrl($article->getData('contextId'))|escape}"
-							alt="{$coverImage.altText|escape|default:''}"
-						>
-					{else}
-						<a href="{url page="issue" op="view" path=$issue->getBestIssueId()}">
-							<img
-								class="img-responsive"
-								src="{$issue->getLocalizedCoverImageUrl()|escape}"
-								alt="{$issue->getLocalizedCoverImageAltText()|escape|default:''}"
-							>
-						</a>
-					{/if}
-				</div>
-			{/if}
-
-			{* Article Galleys *}
-			{if $primaryGalleys || $supplementaryGalleys}
-				<div class="download">
-					{if $primaryGalleys}
-						{foreach from=$primaryGalleys item=galley}
-							{include file="frontend/objects/galley_link.tpl" parent=$article purchaseFee=$currentJournal->getSetting('purchaseArticleFee') purchaseCurrency=$currentJournal->getSetting('currency')}
-						{/foreach}
-					{/if}
-					{if $supplementaryGalleys}
-						{foreach from=$supplementaryGalleys item=galley}
-							{include file="frontend/objects/galley_link.tpl" parent=$article isSupplementary="1"}
-						{/foreach}
-					{/if}
-				</div>
-			{/if}
-
-			<div class="list-group">
-
-				{* Published date *}
-				{if $publication->getData('datePublished')}
-					<div class="list-group-item date-published">
-						{capture assign=translatedDatePublished}{translate key="submissions.published"}{/capture}
-						<strong>{translate key="semicolon" label=$translatedDatePublished}</strong>
-						{$publication->getData('datePublished')|date_format}
-					</div>
-					{* If this is an updated version *}
-					{if $firstPublication->getID() !== $publication->getId()}
-						<div class="list-group-item date-updated">
-							{capture assign=translatedUpdated}{translate key="common.updated"}{/capture}
-							<strong>{translate key="semicolon" label=$translatedUpdated}</strong>
-							{$publication->getData('datePublished')|date_format:$dateFormatShort}
-						</div>
-					{/if}
-					{* Versions *}
-					{if count($article->getPublishedPublications()) > 1}
-						<div class="list-group-item versions">
-							<strong>{capture assign=translatedVersions}{translate key="submission.versions"}{/capture}
-							{translate key="semicolon" label=$translatedVersions}</strong>
-							{foreach from=array_reverse($article->getPublishedPublications()) item=iPublication}
-								{capture assign="name"}{translate key="submission.versionIdentity" datePublished=$iPublication->getData('datePublished')|date_format:$dateFormatShort version=$iPublication->getData('version')}{/capture}
-								<div>
-									{if $iPublication->getId() === $publication->getId()}
-										{$name}
-									{elseif $iPublication->getId() === $currentPublication->getId()}
-										<a href="{url page="article" op="view" path=$article->getBestId()}">{$name}</a>
-									{else}
-										<a href="{url page="article" op="view" path=$article->getBestId()|to_array:"version":$iPublication->getId()}">{$name}</a>
-									{/if}
-								</div>
-							{/foreach}
-						</div>
-					{/if}
-				{/if}
-
-				{* DOI (requires plugin) *}
-				{foreach from=$pubIdPlugins item=pubIdPlugin}
-					{if $pubIdPlugin->getPubIdType() != 'doi'}
-						{continue}
-					{/if}
-					{if $issue->getPublished()}
-						{assign var=pubId value=$article->getStoredPubId($pubIdPlugin->getPubIdType())}
-					{else}
-						{assign var=pubId value=$pubIdPlugin->getPubId($article)}{* Preview pubId *}
-					{/if}
-					{if $pubId}
-						{assign var="doiUrl" value=$pubIdPlugin->getResolvingURL($currentJournal->getId(), $pubId)|escape}
-						<div class="list-group-item doi">
-							{capture assign=translatedDoi}{translate key="plugins.pubIds.doi.readerDisplayName"}{/capture}
-							<strong>{translate key="semicolon" label=$translatedDoi}</strong>
-							<a href="{$doiUrl}">
-								{$doiUrl}
-							</a>
-						</div>
-					{/if}
-				{/foreach}
-
-				{* Keywords *}
-				{if !empty($keywords[$currentLocale])}
-					<div class="list-group-item keywords">
-						<strong>{capture assign=translatedKeywords}{translate key="article.subject"}{/capture}
-							{translate key="semicolon" label=$translatedKeywords}</strong>
-						<div class="">
-								<span class="value">
-									{foreach from=$keywords item=keyword}
-										{foreach name=keywords from=$keyword item=keywordItem}
-											{$keywordItem|escape}{if !$smarty.foreach.keywords.last}, {/if}
-										{/foreach}
-									{/foreach}
-								</span>
-						</div>
-					</div>
-				{/if}
-			</div>
-
-		</section><!-- .article-sidebar -->
-
 		<div class="col-md-12">
 			<section class="article-main">
 
@@ -178,6 +55,8 @@
 								{if $author->getLocalizedAffiliation()}
 									<div class="article-author-affilitation">
 										{$author->getLocalizedAffiliation()|escape}
+									</div>
+									<div class="article-author-biography">
 										{$author->getLocalizedBiography()|strip_unsafe_html}
 									</div>
 								{/if}
@@ -207,6 +86,129 @@
 				{call_hook name="Templates::Article::Main"}
 
 			</section><!-- .article-main -->
+
+			<section class="article-sidebar col-md-12">
+	
+				{* Screen-reader heading for easier navigation jumps *}
+				<h2 class="sr-only">{translate key="plugins.themes.bootstrap3.article.sidebar"}</h2>
+	
+				{* Article/Issue cover image *}
+				{if $publication->getLocalizedData('coverImage') || ($issue && $issue->getLocalizedCoverImage())}
+					<div class="cover-image">
+						{if $publication->getLocalizedData('coverImage')}
+							{assign var="coverImage" value=$publication->getLocalizedData('coverImage')}
+							<img
+								class="img-responsive"
+								src="{$publication->getLocalizedCoverImageUrl($article->getData('contextId'))|escape}"
+								alt="{$coverImage.altText|escape|default:''}"
+							>
+						{else}
+							<a href="{url page="issue" op="view" path=$issue->getBestIssueId()}">
+								<img
+									class="img-responsive"
+									src="{$issue->getLocalizedCoverImageUrl()|escape}"
+									alt="{$issue->getLocalizedCoverImageAltText()|escape|default:''}"
+								>
+							</a>
+						{/if}
+					</div>
+				{/if}
+	
+				{* Article Galleys *}
+				{if $primaryGalleys || $supplementaryGalleys}
+					<div class="download col-md-4">
+						{if $primaryGalleys}
+							{foreach from=$primaryGalleys item=galley}
+								{include file="frontend/objects/galley_link.tpl" parent=$article purchaseFee=$currentJournal->getSetting('purchaseArticleFee') purchaseCurrency=$currentJournal->getSetting('currency')}
+							{/foreach}
+						{/if}
+						{if $supplementaryGalleys}
+							{foreach from=$supplementaryGalleys item=galley}
+								{include file="frontend/objects/galley_link.tpl" parent=$article isSupplementary="1"}
+							{/foreach}
+						{/if}
+					</div>
+				{/if}
+	
+				<div class="list-group">
+	
+					{* Published date *}
+					{if $publication->getData('datePublished')}
+						<div class="list-group-item date-published">
+							{capture assign=translatedDatePublished}{translate key="submissions.published"}{/capture}
+							<strong>{translate key="semicolon" label=$translatedDatePublished}</strong>
+							{$publication->getData('datePublished')|date_format}
+						</div>
+						{* If this is an updated version *}
+						{if $firstPublication->getID() !== $publication->getId()}
+							<div class="list-group-item date-updated">
+								{capture assign=translatedUpdated}{translate key="common.updated"}{/capture}
+								<strong>{translate key="semicolon" label=$translatedUpdated}</strong>
+								{$publication->getData('datePublished')|date_format:$dateFormatShort}
+							</div>
+						{/if}
+						{* Versions *}
+						{if count($article->getPublishedPublications()) > 1}
+							<div class="list-group-item versions">
+								<strong>{capture assign=translatedVersions}{translate key="submission.versions"}{/capture}
+								{translate key="semicolon" label=$translatedVersions}</strong>
+								{foreach from=array_reverse($article->getPublishedPublications()) item=iPublication}
+									{capture assign="name"}{translate key="submission.versionIdentity" datePublished=$iPublication->getData('datePublished')|date_format:$dateFormatShort version=$iPublication->getData('version')}{/capture}
+									<div>
+										{if $iPublication->getId() === $publication->getId()}
+											{$name}
+										{elseif $iPublication->getId() === $currentPublication->getId()}
+											<a href="{url page="article" op="view" path=$article->getBestId()}">{$name}</a>
+										{else}
+											<a href="{url page="article" op="view" path=$article->getBestId()|to_array:"version":$iPublication->getId()}">{$name}</a>
+										{/if}
+									</div>
+								{/foreach}
+							</div>
+						{/if}
+					{/if}
+	
+					{* DOI (requires plugin) *}
+					{foreach from=$pubIdPlugins item=pubIdPlugin}
+						{if $pubIdPlugin->getPubIdType() != 'doi'}
+							{continue}
+						{/if}
+						{if $issue->getPublished()}
+							{assign var=pubId value=$article->getStoredPubId($pubIdPlugin->getPubIdType())}
+						{else}
+							{assign var=pubId value=$pubIdPlugin->getPubId($article)}{* Preview pubId *}
+						{/if}
+						{if $pubId}
+							{assign var="doiUrl" value=$pubIdPlugin->getResolvingURL($currentJournal->getId(), $pubId)|escape}
+							<div class="list-group-item doi">
+								{capture assign=translatedDoi}{translate key="plugins.pubIds.doi.readerDisplayName"}{/capture}
+								<strong>{translate key="semicolon" label=$translatedDoi}</strong>
+								<a href="{$doiUrl}">
+									{$doiUrl}
+								</a>
+							</div>
+						{/if}
+					{/foreach}
+	
+					{* Keywords *}
+					{if !empty($keywords[$currentLocale])}
+						<div class="list-group-item keywords">
+							<strong>{capture assign=translatedKeywords}{translate key="article.subject"}{/capture}
+								{translate key="semicolon" label=$translatedKeywords}</strong>
+							<div class="">
+									<span class="value">
+										{foreach from=$keywords item=keyword}
+											{foreach name=keywords from=$keyword item=keywordItem}
+												{$keywordItem|escape}{if !$smarty.foreach.keywords.last}, {/if}
+											{/foreach}
+										{/foreach}
+									</span>
+							</div>
+						</div>
+					{/if}
+				</div>
+	
+			</section><!-- .article-sidebar -->
 
 			<section class="article-more-details">
 
