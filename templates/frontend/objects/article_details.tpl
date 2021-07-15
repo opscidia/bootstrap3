@@ -186,11 +186,6 @@
 					</div>
 				{/if}
 			</div>
-
-		</section><!-- .article-sidebar -->
-
-
-		<section class="article-sidebar col-md-12">
 	
 			{* Article Galleys *}
 			{if $primaryGalleys || $supplementaryGalleys}
