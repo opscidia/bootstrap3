@@ -53,7 +53,7 @@
 							<strong>{$author->getFullName()|escape}</strong>
 							{if $author->getEmail()}
 								<div class="article-author-email">
-									{$author->getEmail()|escape}
+								    <a href:"mailto:{$author->getEmail()|escape}">{$author->getEmail()|escape}</a>
 								</div>
 							{/if}
 							{if $author->getLocalizedAffiliation()}
