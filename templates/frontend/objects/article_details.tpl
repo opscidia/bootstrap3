@@ -51,6 +51,11 @@
 					{foreach from=$publication->getData('authors') item=author}
 						<div class="author">
 							<strong>{$author->getFullName()|escape}</strong>
+							{if $author->getEmail()}
+								<div class="article-author-email">
+									{$author->getEmail()|escape}
+								</div>
+							{/if}
 							{if $author->getLocalizedAffiliation()}
 								<div class="article-author-affilitation">
 									{$author->getLocalizedAffiliation()|escape}
